@@ -40,14 +40,20 @@ export const setInterfaces = sdk.setupInterfaces(async ({ effects }) => {
   return [await origin.export([relay])]
 })
 
-// Domains, public or private (`kind: 'domain'` matches both). Buzz itself
-// accepts any host; this narrows to the ones that still make sense years from
-// now, because the binding cannot be revisited. A domain is a name its owner
-// controls and resolves on 443; an mDNS name, a DHCP/ISP-assigned IP, and
-// StartOS's high external ports all move. Those ports are the sharp edge --
-// they are reassigned across reinstalls (observed: 58891 -> 58625 -> 50306),
-// and a LAN or IP address carries one in its URL, so a restore onto a different
-// box would strand the community permanently.
+// Domains, public or private (`kind: 'domain'` matches both), PLUS
+// plugin-provided hostnames (`kind: 'plugin'`) -- the kind every hostname
+// attached through another package carries, notably the Cloudflare Tunnel
+// package. A tunnel hostname is exactly the stable, owner-controlled public
+// name this address wants, and the owner attached it on purpose; filtering it
+// out left "Set Relay Address" empty on tunnel-fronted boxes (confirmed
+// 2026-10-16 on 0.4.0.2). Buzz itself accepts any host; this narrows to the
+// ones that still make sense years from now, because the binding cannot be
+// revisited. A domain is a name its owner controls and resolves on 443; an
+// mDNS name, a DHCP/ISP-assigned IP, and StartOS's high external ports all
+// move. Those ports are the sharp edge -- they are reassigned across
+// reinstalls (observed: 58891 -> 58625 -> 50306), and a LAN or IP address
+// carries one in its URL, so a restore onto a different box would strand the
+// community permanently.
 //
 // The traversal stays inside the callback so `host` keeps its contextual type:
 // `FilledHost` lives in start-core, which is nested under the SDK rather than a
@@ -60,7 +66,11 @@ export function getRelayDomains(effects: T.Effects): Promise<string[]> {
         Object.values(host.bindings)
           .flatMap((b) => Object.values(b.interfaces))
           .find((i) => i.id === relayInterfaceId)
-      return iface ? iface.addressInfo.filter({ kind: 'domain' }).format() : []
+      return iface
+        ? iface.addressInfo
+            .matchesAny([{ kind: 'domain' }, { kind: 'plugin' }])
+            .format()
+        : []
     })
     .once()
 }
