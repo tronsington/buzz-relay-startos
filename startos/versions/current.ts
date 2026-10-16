@@ -12,7 +12,7 @@ export const current = VersionInfo.of({
     pl_PL:
       'Aktualizuje dołączony przekaźnik do głównej kompilacji upstream sha-30873ba (2026-10-11). W szczególności naprawia usuwanie przepływów pracy, które wcześniej było akceptowane, ale po cichu nigdy nie stosowane.',
     fr_FR:
-      "Met à jour le relais intégré vers la compilation principale amont sha-30873ba (2026-10-11). Corrige notamment la suppression des flux de travail, auparavant acceptée mais jamais réellement appliquée.",
+      'Met à jour le relais intégré vers la compilation principale amont sha-30873ba (2026-10-11). Corrige notamment la suppression des flux de travail, auparavant acceptée mais jamais réellement appliquée.',
   },
   migrations: {
     up: async ({ effects }) => {},
