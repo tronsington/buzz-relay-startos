@@ -34,6 +34,24 @@ curl -sI -H "Authorization: Bearer $TOKEN" \
   "https://ghcr.io/v2/block/buzz/manifests/sha-${COMMIT:0:7}"
 ```
 
+## Finding the newest tested pin (this repo's own releases)
+
+The `sha-<short>` tags above live on the **upstream image**. This repo's own
+releases are versioned `v<version>-<revision>-sha-<short>` (for example
+`v0.2.1-4-sha-30873ba`) and published as GitHub releases; the releases endpoint
+returns newest first with `published_at`, so "what did we last ship" is
+scriptable and does not depend on tag sort order:
+
+```bash
+curl -s "https://api.github.com/repos/tronsington/buzz-relay-startos/releases?per_page=5" \
+  | grep -E '"(tag_name|published_at)"'
+```
+
+The repo is public, so this call needs no token.
+
+Do not expect `main-<timestamp>` style tags — they do not exist. (Believed once,
+disproved 2026-10-19: the repo carries only the versioned form above.)
+
 ## Applying the bump
 
 1. `startos/manifest/index.ts` — set the `buzz-relay` image's `dockerTag` to
